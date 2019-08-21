@@ -8,12 +8,13 @@ import { Recipe } from './recipes.model';
   styleUrls: ['./recipes.page.scss']
 })
 export class RecipesPage implements OnInit {
-
   recipes: Recipe[];
 
   constructor(private recipesService: RecipesService) {}
 
-  ngOnInit() {
+  ngOnInit() {}
+
+  ionViewWillEnter() {
     this.recipes = this.recipesService.getAllRecipes();
   }
 
