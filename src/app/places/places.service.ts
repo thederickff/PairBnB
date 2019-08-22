@@ -29,8 +29,39 @@ export class PlacesService {
     )
   ];
 
+  private mPlaces2: Place[] = [
+    new Place(
+      '4',
+      'Gran Hotel Ciudad De Mexico',
+      '60 smoke-free guestrooms, Restaurant and 2 restaurants and Rooftop terrace',
+      'https://thumbnails.trvl-media.com/_1zvG_S5crNfs1YLEIF1pDZLgLw=/582x388/smart/' +
+        'filters:quality(60)/exp.cdn-hotels.com/hotels/1000000/30000/21400/21358/ca08b544_z.jpg',
+      179.99
+    ),
+    new Place(
+      '5',
+      'Barceló México Reforma',
+      'Luxury hotel with 3 restaurants, near Teatro Metropólitan',
+      'https://thumbnails.trvl-media.com/0ydepJNDssbrZpnEfbuIfdAuB-4=/582x388/smart/' +
+        'filters:quality(60)/exp.cdn-hotels.com/hotels/1000000/30000/25800/25798/58952a54_z.jpg',
+      95.99
+    ),
+    new Place(
+      '6',
+      'NH Collection Mexico City Centro Histórico',
+      '4-star hotel with restaurant, near Plaza de la Constitucion.',
+      'https://thumbnails.trvl-media.com/ckH8tk4raeUF8mUKE9P7jCIfUMs=/582x388/smart/' +
+        'filters:quality(60)/exp.cdn-hotels.com/hotels/2000000/1360000/1354000/1353939/d8d86787_z.jpg',
+      107.99
+    )
+  ];
+
   get places() {
     return [...this.mPlaces];
+  }
+
+  get places2() {
+    return [...this.mPlaces2];
   }
 
   constructor() {}
