@@ -56,6 +56,8 @@ export class PlacesService {
     )
   ];
 
+  constructor() {}
+
   get places() {
     return [...this.mPlaces];
   }
@@ -64,5 +66,11 @@ export class PlacesService {
     return [...this.mPlaces2];
   }
 
-  constructor() {}
+  getPlace(placeId: string): Place {
+    return { ...this.mPlaces.find(place => place.id === placeId) };
+  }
+
+  getPlace2(placeId: string): Place {
+    return { ...this.mPlaces2.find(place => place.id === placeId) };
+  }
 }
