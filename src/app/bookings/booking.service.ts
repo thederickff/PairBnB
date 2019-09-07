@@ -3,7 +3,7 @@ import { Booking } from './booking.model';
 
 @Injectable({ providedIn: 'root' })
 export class BookingService {
-  private _bookings: Booking[] = [
+  private mBookings: Booking[] = [
     {
       id: '001',
       placeId: '1',
@@ -14,6 +14,6 @@ export class BookingService {
   ];
 
   get bookings() {
-    return [...this._bookings];
+    return [...this.mBookings];
   }
 }
