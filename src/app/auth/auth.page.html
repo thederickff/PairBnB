@@ -5,12 +5,35 @@
 </ion-header>
 
 <ion-content padding>
-  <ion-item>
-    <ion-label position="floating">Usuario</ion-label>
-    <ion-input></ion-input>
-  </ion-item>
-  <!-- <div text-center>
-    <ion-spinner color="primary" *ngIf="isLoading"></ion-spinner>
-  </div> -->
-  <ion-button color="primary" (click)="onLogin()" expand="block">Login</ion-button>
+  <ion-grid>
+    <ion-row>
+      <ion-col size-sm="6" offset-sm="3">
+        <ion-list>
+          <ion-item>
+            <ion-label position="floating">E-Mail</ion-label>
+            <ion-input type="email"></ion-input>
+          </ion-item>
+          <ion-item>
+            <ion-label position="floating">Password</ion-label>
+            <ion-input type="password"></ion-input>
+          </ion-item>
+          <ion-item>
+              <ion-button slot="start">
+                Start
+              </ion-button>
+              <ion-label>Button Start/End</ion-label>
+              <ion-button slot="end">
+                End
+              </ion-button>
+            </ion-item>
+        </ion-list>
+      </ion-col>
+    </ion-row>
+    <ion-row>
+      <ion-col size-sm="6" offset-sm="3">
+        <ion-button color="primary" fill="clear" expand="block">Switch to Login</ion-button>
+        <ion-button color="primary" (click)="onLogin()" expand="block">Login</ion-button>
+      </ion-col>
+    </ion-row>
+  </ion-grid>
 </ion-content>
