@@ -2,14 +2,14 @@
   <ion-thumbnail slot="start">
     <ion-img [src]="place.imageUrl"></ion-img>
   </ion-thumbnail>
-  <ion-label>
+  <ion-label text-wrap>
     <h1>{{ place.title }}</h1>
     <div class="offer-details">
       <ion-icon name="calendar" color="primary"></ion-icon>
-      <ion-text color="tertiary" class="space-left">{{ getDummyDate() | date }}</ion-text>
+      <ion-text color="tertiary" class="space-left">{{ place.availableFrom | date }}</ion-text>
       <span class="space-left">to</span>
       <ion-icon name="calendar" color="primary" class="space-left"></ion-icon>
-      <ion-text color="tertiary" class="space-left">{{ getDummyDate() | date }}</ion-text>
+      <ion-text color="tertiary" class="space-left">{{ place.availableTo | date }}</ion-text>
     </div>
   </ion-label>
 </ion-item>
