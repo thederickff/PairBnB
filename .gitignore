@@ -34,4 +34,4 @@ $RECYCLE.BIN/
 Thumbs.db
 UserInterfaceState.xcuserstate
 # custom
-src/app/enviroments/enviroment.ts
+src/enviroments/enviroment.ts

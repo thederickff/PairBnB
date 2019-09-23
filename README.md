@@ -3,7 +3,7 @@
 A place booking app, where people can offer their places and you can book other places, a little bit like AirBnB
 
 ## Important
-Paste this code as a new file <code>src/app/environments/environment.ts</code>
+Paste this code below as a new file <code>src/environments/environment.ts</code>
 
 ```typescript
 // This file can be replaced during build by using the `fileReplacements` array.
@@ -13,7 +13,7 @@ Paste this code as a new file <code>src/app/environments/environment.ts</code>
 export const environment = {
   production: false,
   // I am using firebase's realtime database url, you can use any other
-  serverBaseUrl: "<PLACE YOUR BACKEND URL HERE>"
+  serverBaseUrl: '<PLACE YOUR BACKEND URL HERE>'
 };
 
 /*
