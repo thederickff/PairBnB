@@ -17,7 +17,7 @@ export class PlacesService {
       149.99,
       new Date('2019-09-14'),
       new Date('2019-09-20'),
-      'abc'
+      'user01'
     ),
     new Place(
       '2',
@@ -27,7 +27,7 @@ export class PlacesService {
       189.99,
       new Date('2019-09-16'),
       new Date('2019-09-22'),
-      'bcd'
+      'user01'
     ),
     new Place(
       '3',
@@ -37,7 +37,7 @@ export class PlacesService {
       119.99,
       new Date('2019-09-15'),
       new Date('2019-09-20'),
-      'abc'
+      'user02'
     ),
     new Place(
       '4',
