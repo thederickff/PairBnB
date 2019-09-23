@@ -13,6 +13,7 @@ import { Subscription } from 'rxjs';
 })
 export class OffersPage implements OnInit, OnDestroy {
   loadedPlaces: Place[];
+  loading = false;
   private placesSub: Subscription;
 
   constructor(
@@ -26,6 +27,13 @@ export class OffersPage implements OnInit, OnDestroy {
       this.loadedPlaces = places.filter(
         place => place.userId === this.authService.userId
       );
+    });
+  }
+
+  ionViewWillEnter() {
+    this.loading = true;
+    this.placesService.fetchPlaces().subscribe(() => {
+      this.loading = false;
     });
   }
 
