@@ -106,15 +106,27 @@ export class PlacesService {
   }
 
   updatePlace(placeId: string, title: string, description: string) {
+    let updatedPlaces: Place[];
+
     return this.places.pipe(
       take(1),
-      delay(1000),
-      tap(places => {
+      switchMap(places => {
         const index = places.findIndex(place => place.id === placeId);
         places[index].title = title;
         places[index].description = description;
 
-        this.mPlaces.next(places);
+        updatedPlaces = places;
+
+        return this.http.put(
+          `${environment.serverBaseUrl}/places/${placeId}.json`,
+          {
+            ...places[index],
+            id: null
+          }
+        );
+      }),
+      tap(() => {
+        this.mPlaces.next(updatedPlaces);
       })
     );
   }
