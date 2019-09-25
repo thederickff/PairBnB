@@ -4,7 +4,8 @@ import {
   NavController,
   ModalController,
   ActionSheetController,
-  LoadingController
+  LoadingController,
+  AlertController
 } from '@ionic/angular';
 import { Place } from '../../place.model';
 import { PlacesService } from '../../places.service';
@@ -31,6 +32,7 @@ export class PlaceDetailPage implements OnInit, OnDestroy {
     private modalCtrl: ModalController,
     private actionSheetCtrl: ActionSheetController,
     private loadingCtrl: LoadingController,
+    private alertCtrl: AlertController,
     private placesService: PlacesService,
     private bookingService: BookingService,
     private authService: AuthService
@@ -47,9 +49,23 @@ export class PlaceDetailPage implements OnInit, OnDestroy {
       this.placeSub = this.placesService
         .getPlace(paramMap.get('placeId'))
         .subscribe(place => {
-          this.isLoading = false;
           this.place = place;
           this.bookable = this.authService.userId !== place.userId;
+          this.isLoading = false;
+        }, error => {
+          this.alertCtrl.create({
+            header: 'An error ocurred!!',
+            message: 'Could not fetch place. Please try again later!',
+            backdropDismiss: false,
+            buttons: [
+              {
+                text: 'Okay',
+                handler: () => {
+                  this.router.navigate(['/places/tabs/discover']);
+                }
+              }
+            ]
+          }).then(alertEl => alertEl.present());
         });
     });
   }
