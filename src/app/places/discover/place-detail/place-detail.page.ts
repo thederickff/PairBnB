@@ -22,6 +22,7 @@ export class PlaceDetailPage implements OnInit, OnDestroy {
   place: Place;
   placeSub: Subscription;
   bookable = false;
+  isLoading = false;
 
   constructor(
     private route: ActivatedRoute,
@@ -42,9 +43,11 @@ export class PlaceDetailPage implements OnInit, OnDestroy {
         return;
       }
 
+      this.isLoading = true;
       this.placeSub = this.placesService
         .getPlace(paramMap.get('placeId'))
         .subscribe(place => {
+          this.isLoading = false;
           this.place = place;
           this.bookable = this.authService.userId !== place.userId;
         });
