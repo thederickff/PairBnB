@@ -48,25 +48,30 @@ export class PlaceDetailPage implements OnInit, OnDestroy {
       this.isLoading = true;
       this.placeSub = this.placesService
         .getPlace(paramMap.get('placeId'))
-        .subscribe(place => {
-          this.place = place;
-          this.bookable = this.authService.userId !== place.userId;
-          this.isLoading = false;
-        }, error => {
-          this.alertCtrl.create({
-            header: 'An error ocurred!!',
-            message: 'Could not fetch place. Please try again later!',
-            backdropDismiss: false,
-            buttons: [
-              {
-                text: 'Okay',
-                handler: () => {
-                  this.router.navigate(['/places/tabs/discover']);
-                }
-              }
-            ]
-          }).then(alertEl => alertEl.present());
-        });
+        .subscribe(
+          place => {
+            this.place = place;
+            this.bookable = this.authService.userId !== place.userId;
+            this.isLoading = false;
+          },
+          error => {
+            this.alertCtrl
+              .create({
+                header: 'An error ocurred!!',
+                message: 'Could not fetch place. Please try again later!',
+                backdropDismiss: false,
+                buttons: [
+                  {
+                    text: 'Okay',
+                    handler: () => {
+                      this.router.navigate(['/places/tabs/discover']);
+                    }
+                  }
+                ]
+              })
+              .then(alertEl => alertEl.present());
+          }
+        );
     });
   }
 
@@ -111,34 +116,51 @@ export class PlaceDetailPage implements OnInit, OnDestroy {
 
         modalEl.onDidDismiss().then(result => {
           if (result.role === 'confirm') {
+            this.loadingCtrl
+              .create({
+                message: 'Booking Place...'
+              })
+              .then(loadingEl => {
+                loadingEl.present();
 
-            this.loadingCtrl.create({
-              message: 'Booking Place...'
-            }).then(loadingEl => {
-              loadingEl.present();
+                const {
+                  firstName,
+                  lastName,
+                  guestNumber,
+                  startDate,
+                  endDate
+                } = result.data.bookingData;
 
-              const {
-                firstName,
-                lastName,
-                guestNumber,
-                startDate,
-                endDate
-              } = result.data.bookingData;
+                this.bookingService
+                  .addBooking(
+                    this.place.id,
+                    this.place.title,
+                    this.place.imageUrl,
+                    firstName,
+                    lastName,
+                    guestNumber,
+                    startDate,
+                    endDate
+                  )
+                  .subscribe(
+                    () => {
+                      loadingEl.dismiss();
+                      this.router.navigate(['/', 'places', 'tabs', 'discover']);
+                    },
+                    error => {
+                      loadingEl.dismiss();
 
-              this.bookingService.addBooking(
-                this.place.id,
-                this.place.title,
-                this.place.imageUrl,
-                firstName,
-                lastName,
-                guestNumber,
-                startDate,
-                endDate
-              ).subscribe(() => {
-                loadingEl.dismiss();
-                this.router.navigate(['/', 'places', 'tabs', 'discover']);
+                      this.alertCtrl
+                        .create({
+                          header: 'An error ocurred!!',
+                          message: error.message,
+                          backdropDismiss: false,
+                          buttons: ['Okay']
+                        })
+                        .then(alertEl => alertEl.present());
+                    }
+                  );
               });
-            });
           }
         });
       });

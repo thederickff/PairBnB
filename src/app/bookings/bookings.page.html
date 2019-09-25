@@ -8,7 +8,10 @@
 </ion-header>
 
 <ion-content>
-  <ion-grid>
+  <div *ngIf="isLoading" text-center>
+    <ion-spinner></ion-spinner>
+  </div>
+  <ion-grid *ngIf="!isLoading">
     <ion-row>
       <ion-col size-md="6" offset-md="3" *ngIf="!loadedBookings || loadedBookings.length === 0" text-center>
         <p>No bookings found!</p>
