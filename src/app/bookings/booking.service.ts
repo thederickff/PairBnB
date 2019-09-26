@@ -31,7 +31,7 @@ export class BookingService {
   fectchBookings() {
     return this.http
       .get<{ [key: string]: BookingData }>(
-        `${environment.serverBaseUrl}/bookings.json`
+        `${environment.serverBaseUrl}/bookings.json?orderBy="userId"&equalTo="${this.authService.userId}"`
       )
       .pipe(
         map(response => {
