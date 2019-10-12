@@ -13,7 +13,8 @@ Paste this code below as a new file <code>src/environments/environment.ts</code>
 export const environment = {
   production: false,
   // I am using firebase's realtime database url, you can use any other
-  serverBaseUrl: '<PLACE YOUR BACKEND URL HERE>'
+  serverBaseUrl: '<PLACE YOUR BACKEND URL HERE>',
+  googleMapsApiKey: '<PLACE YOUR GOOGLE MAPS API KEY HERE>'
 };
 
 /*
