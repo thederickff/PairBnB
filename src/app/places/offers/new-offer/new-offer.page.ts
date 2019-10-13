@@ -3,6 +3,7 @@ import { FormGroup, FormControl, Validators } from '@angular/forms';
 import { PlacesService } from '../../places.service';
 import { Router } from '@angular/router';
 import { LoadingController } from '@ionic/angular';
+import { PlaceLocation } from '../../location.model';
 
 @Component({
   selector: 'app-new-offer',
@@ -39,6 +40,10 @@ export class NewOfferPage implements OnInit {
       dateTo: new FormControl(null, {
         updateOn: 'blur',
         validators: [Validators.required]
+      }),
+      location: new FormControl(null, {
+        updateOn: 'blur',
+        validators: [Validators.required]
       })
     });
   }
@@ -48,7 +53,7 @@ export class NewOfferPage implements OnInit {
       return;
     }
 
-    const { title, description, price, dateFrom, dateTo } = this.form.value;
+    const { title, description, price, dateFrom, dateTo, location } = this.form.value;
     this.loadindCtrl
       .create({
         message: 'Creating a new offer...'
@@ -62,7 +67,8 @@ export class NewOfferPage implements OnInit {
             description,
             price,
             new Date(dateFrom),
-            new Date(dateTo)
+            new Date(dateTo),
+            location
           )
           .subscribe(() => {
             loadingEl.dismiss();
@@ -70,5 +76,9 @@ export class NewOfferPage implements OnInit {
             this.router.navigate(['/places/tabs/offers']);
           });
       });
+  }
+
+  changeLocation(location: PlaceLocation) {
+    this.form.patchValue({ location });
   }
 }

@@ -5,6 +5,7 @@ import { BehaviorSubject, of } from 'rxjs';
 import { take, map, tap, delay, switchMap } from 'rxjs/operators';
 import { HttpClient } from '@angular/common/http';
 import { environment } from 'src/environments/environment';
+import { PlaceLocation } from './location.model';
 
 interface PlaceData {
   availableFrom: string;
@@ -14,6 +15,7 @@ interface PlaceData {
   price: number;
   title: string;
   userId: string;
+  location: PlaceLocation;
 }
 
 @Injectable({
@@ -47,7 +49,8 @@ export class PlacesService {
                   response[key].price,
                   new Date(response[key].availableFrom),
                   new Date(response[key].availableTo),
-                  response[key].userId
+                  response[key].userId,
+                  response[key].location
                 )
               );
             }
@@ -74,7 +77,8 @@ export class PlacesService {
             place.price,
             new Date(place.availableFrom),
             new Date(place.availableTo),
-            place.userId
+            place.userId,
+            place.location
           );
         })
       );
@@ -85,7 +89,8 @@ export class PlacesService {
     description: string,
     price: number,
     dateFrom: Date,
-    dateTo: Date
+    dateTo: Date,
+    location: PlaceLocation
   ) {
     const newPlace = new Place(
       Math.random().toString(),
@@ -95,7 +100,8 @@ export class PlacesService {
       price,
       dateFrom,
       dateTo,
-      this.authService.userId
+      this.authService.userId,
+      location
     );
 
     return this.http

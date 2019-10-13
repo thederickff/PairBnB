@@ -19,8 +19,18 @@
       </ion-col>
     </ion-row>
     <ion-row>
-      <ion-col size-sm="6" offset-sm="3" text-center>
+      <ion-col size-sm="6" offset-sm="3" padding text-center>
         <p>{{ place.description }}</p>
+      </ion-col>
+    </ion-row>
+    <ion-row>
+      <ion-col size-sm="6" offset-sm="3" text-center>
+        <p>{{ place.location.address }}</p>
+      </ion-col>
+    </ion-row>
+    <ion-row>
+      <ion-col size-sm="6" offset-sm="3" no-padding>
+        <ion-img role="button" (click)="openPlace()" class="location-image" [src]="place.location.imgUrl"></ion-img>
       </ion-col>
     </ion-row>
     <ion-row *ngIf="bookable">

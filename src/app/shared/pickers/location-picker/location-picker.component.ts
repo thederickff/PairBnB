@@ -1,10 +1,10 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, EventEmitter, Output } from '@angular/core';
 import { ModalController } from '@ionic/angular';
 import { MapModalComponent } from '../../map-modal/map-modal.component';
 import { HttpClient } from '@angular/common/http';
 import { environment } from 'src/environments/environment';
 import { map, switchMap } from 'rxjs/operators';
-import { Location, Coordinates } from 'src/app/places/location.model';
+import { PlaceLocation, Coordinates } from 'src/app/places/location.model';
 import { of } from 'rxjs';
 
 @Component({
@@ -13,6 +13,7 @@ import { of } from 'rxjs';
   styleUrls: ['./location-picker.component.scss']
 })
 export class LocationPickerComponent implements OnInit {
+  @Output() change = new EventEmitter<PlaceLocation>();
   selectedLocationImageUrl: string;
   isLoading: boolean;
 
@@ -23,7 +24,12 @@ export class LocationPickerComponent implements OnInit {
   onPickLocation() {
     this.modalCtrl
       .create({
-        component: MapModalComponent
+        component: MapModalComponent,
+        componentProps: {
+          selectable: true,
+          title: 'Pick a Location',
+          buttonText: 'Cancel'
+        }
       })
       .then(modalEl => {
         modalEl.present();
@@ -32,7 +38,7 @@ export class LocationPickerComponent implements OnInit {
           if (result.role === 'success') {
             this.isLoading = true;
 
-            const location: Location = {
+            const location: PlaceLocation = {
               lat: result.data.lat,
               lng: result.data.lng,
               address: null,
@@ -52,6 +58,7 @@ export class LocationPickerComponent implements OnInit {
 
                 this.selectedLocationImageUrl = imgUrl;
                 this.isLoading = false;
+                this.change.emit(location);
               });
           }
         });
@@ -74,7 +81,7 @@ export class LocationPickerComponent implements OnInit {
       );
   }
 
-  private getMapImageUrl(location: Location) {
+  private getMapImageUrl(location: Coordinates) {
     return `https://maps.googleapis.com/maps/api/staticmap?
     center=${location.lat},${location.lng}&zoom=16&size=500x300&maptype=roadmap
     &markers=color:red%7Clabel:L%7C${location.lat},${location.lng}

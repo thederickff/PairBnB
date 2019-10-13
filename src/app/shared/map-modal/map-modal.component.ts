@@ -4,7 +4,9 @@ import {
   AfterViewInit,
   ViewChild,
   ElementRef,
-  Renderer2
+  Renderer2,
+  OnDestroy,
+  Input
 } from '@angular/core';
 import { ModalController } from '@ionic/angular';
 import { environment } from 'src/environments/environment';
@@ -14,8 +16,14 @@ import { environment } from 'src/environments/environment';
   templateUrl: './map-modal.component.html',
   styleUrls: ['./map-modal.component.scss']
 })
-export class MapModalComponent implements OnInit, AfterViewInit {
+export class MapModalComponent implements OnInit, AfterViewInit, OnDestroy {
   @ViewChild('map', null) mapElement: ElementRef;
+  @Input() selectable: false;
+  @Input() center = { lat: -33.8814, lng: 151.1925 };
+  @Input() title = 'Map Modal';
+  @Input() buttonText = 'Close';
+  clickListener: any;
+  googleMaps: any;
 
   constructor(
     private modalCtrl: ModalController,
@@ -27,10 +35,11 @@ export class MapModalComponent implements OnInit, AfterViewInit {
   ngAfterViewInit() {
     this.getGoogleMaps()
       .then(googleMaps => {
+        this.googleMaps = googleMaps;
         const mapEl = this.mapElement.nativeElement;
 
         const map = new googleMaps.Map(mapEl, {
-          center: { lat: -33.8814, lng: 151.1925 },
+          center: this.center,
           zoom: 16
         });
 
@@ -38,14 +47,26 @@ export class MapModalComponent implements OnInit, AfterViewInit {
           this.renderer.addClass(mapEl, 'visible');
         });
 
-        map.addListener('click', event => {
-          const selectedCoords = {
-            lat: event.latLng.lat(),
-            lng: event.latLng.lng()
-          };
+        if (this.selectable) {
+          this.clickListener = map.addListener('click', event => {
+            const selectedCoords = {
+              lat: event.latLng.lat(),
+              lng: event.latLng.lng()
+            };
 
-          this.modalCtrl.dismiss(selectedCoords, 'success');
-        });
+            this.modalCtrl.dismiss(selectedCoords, 'success');
+          });
+        } else {
+          const marker = new googleMaps.Marker(
+            {
+              position: this.center,
+              title: this.title,
+              animation: googleMaps.Animation.DROP,
+            }
+          );
+
+          marker.setMap(map);
+        }
       })
       .catch(error => {
         console.log(error);
@@ -54,6 +75,12 @@ export class MapModalComponent implements OnInit, AfterViewInit {
 
   onCancel() {
     this.modalCtrl.dismiss(null, 'cancel');
+  }
+
+  ngOnDestroy() {
+    if (this.clickListener) {
+      this.googleMaps.event.removeListener(this.clickListener);
+    }
   }
 
   getGoogleMaps(): Promise<any> {
