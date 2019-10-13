@@ -19,6 +19,12 @@ export class LocationPickerComponent implements OnInit {
       })
       .then(modalEl => {
         modalEl.present();
+
+        modalEl.onDidDismiss().then(result => {
+          if (result.role === 'success') {
+            console.log(result.data);
+          }
+        });
       });
   }
 }

@@ -17,7 +17,10 @@ import { environment } from 'src/environments/environment';
 export class MapModalComponent implements OnInit, AfterViewInit {
   @ViewChild('map', null) mapElement: ElementRef;
 
-  constructor(private modalCtrl: ModalController, private renderer: Renderer2) {}
+  constructor(
+    private modalCtrl: ModalController,
+    private renderer: Renderer2
+  ) {}
 
   ngOnInit() {}
 
@@ -27,12 +30,21 @@ export class MapModalComponent implements OnInit, AfterViewInit {
         const mapEl = this.mapElement.nativeElement;
 
         const map = new googleMaps.Map(mapEl, {
-          center: { lat: -34.397, lng: 150.644 },
+          center: { lat: -33.8814, lng: 151.1925 },
           zoom: 16
         });
 
         googleMaps.event.addListenerOnce(map, 'idle', () => {
           this.renderer.addClass(mapEl, 'visible');
+        });
+
+        map.addListener('click', event => {
+          const selectedCoords = {
+            lat: event.latLng.lat(),
+            lng: event.latLng.lng()
+          };
+
+          this.modalCtrl.dismiss(selectedCoords, 'success');
         });
       })
       .catch(error => {
