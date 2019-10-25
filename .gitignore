@@ -35,3 +35,6 @@ Thumbs.db
 UserInterfaceState.xcuserstate
 # custom
 src/environments/environment.ts
+functions/
+.firebaserc
+firebase.json
