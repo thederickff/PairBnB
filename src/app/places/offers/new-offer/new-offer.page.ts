@@ -81,4 +81,8 @@ export class NewOfferPage implements OnInit {
   changeLocation(location: PlaceLocation) {
     this.form.patchValue({ location });
   }
+
+  changeImage(imageStr: string) {
+    console.log(imageStr);
+  }
 }
