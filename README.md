@@ -135,3 +135,13 @@ Add these four dependencies into <code>functions/package.json</code>
 
 Then finally use <code>npm install</code> inside the <code>functions/</code> folder and use
 <code>firebase deploy</code> inside the project root folder.
+
+After that
+define the <code>uploadImageCloudFunctionUrl</code> property on <code>src/environments/environment.ts</code>:
+
+```javascript
+const environment = {
+  ...,
+  uploadImageCloudFunctionUrl: '<PLACE YOUR CLOUD FUNCTION URL HERE>'
+}
+```

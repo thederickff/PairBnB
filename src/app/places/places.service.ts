@@ -84,19 +84,30 @@ export class PlacesService {
       );
   }
 
+  uploadImage(image: File) {
+    const uploadData = new FormData();
+    uploadData.append('image', image);
+
+    return this.http.post<{ imageUrl: string; imagePath: string }>(
+      `${environment.uploadImageCloudFunctionUrl}`,
+      uploadData
+    );
+  }
+
   addPlace(
     title: string,
     description: string,
     price: number,
     dateFrom: Date,
     dateTo: Date,
-    location: PlaceLocation
+    location: PlaceLocation,
+    imageUrl: string,
   ) {
     const newPlace = new Place(
       Math.random().toString(),
       title,
       description,
-      'https://proxy.duckduckgo.com/iu/?u=https%3A%2F%2Fgzbrokers.files.wordpress.com%2F2012%2F02%2Fnewyorkcity-realestate-night.jpg&f=1',
+      imageUrl,
       price,
       dateFrom,
       dateTo,
