@@ -5,6 +5,27 @@ import { Router } from '@angular/router';
 import { LoadingController } from '@ionic/angular';
 import { PlaceLocation } from '../../location.model';
 
+function base64toBlob(base64Data, contentType) {
+  contentType = contentType || '';
+  const sliceSize = 1024;
+  const byteCharacters = atob(base64Data);
+  const bytesLength = byteCharacters.length;
+  const slicesCount = Math.ceil(bytesLength / sliceSize);
+  const byteArrays = new Array(slicesCount);
+
+  for (let sliceIndex = 0; sliceIndex < slicesCount; ++sliceIndex) {
+    const begin = sliceIndex * sliceSize;
+    const end = Math.min(begin + sliceSize, bytesLength);
+
+    const bytes = new Array(end - begin);
+    for (let offset = begin, i = 0; offset < end; ++i, ++offset) {
+      bytes[i] = byteCharacters[offset].charCodeAt(0);
+    }
+    byteArrays[sliceIndex] = new Uint8Array(bytes);
+  }
+  return new Blob(byteArrays, { type: contentType });
+}
+
 @Component({
   selector: 'app-new-offer',
   templateUrl: './new-offer.page.html',
@@ -44,16 +65,26 @@ export class NewOfferPage implements OnInit {
       location: new FormControl(null, {
         updateOn: 'blur',
         validators: [Validators.required]
-      })
+      }),
+      image: new FormControl(null)
     });
   }
 
   onCreateOffer() {
-    if (this.form.invalid) {
+    if (this.form.invalid || !this.form.get('image').value) {
       return;
     }
 
-    const { title, description, price, dateFrom, dateTo, location } = this.form.value;
+    console.log(this.form.value);
+
+    const {
+      title,
+      description,
+      price,
+      dateFrom,
+      dateTo,
+      location
+    } = this.form.value;
     this.loadindCtrl
       .create({
         message: 'Creating a new offer...'
@@ -82,7 +113,20 @@ export class NewOfferPage implements OnInit {
     this.form.patchValue({ location });
   }
 
-  changeImage(imageStr: string) {
-    console.log(imageStr);
+  changeImage(image: string | File) {
+    let imagefile;
+
+    if (typeof image === 'string') {
+      try {
+        imagefile = base64toBlob(image, 'image/jpeg');
+      } catch (error) {
+        console.log(error);
+        return;
+      }
+    } else {
+      imagefile = image;
+    }
+
+    this.form.patchValue({ image: imagefile });
   }
 }
