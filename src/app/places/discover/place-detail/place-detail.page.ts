@@ -7,10 +7,12 @@ import {
   LoadingController,
   AlertController
 } from '@ionic/angular';
+import { Subscription } from 'rxjs';
+import { take, switchMap } from 'rxjs/operators';
+
 import { Place } from '../../place.model';
 import { PlacesService } from '../../places.service';
 import { CreateBookingComponent } from '../../../bookings/create-booking/create-booking.component';
-import { Subscription } from 'rxjs';
 import { BookingService } from 'src/app/bookings/booking.service';
 import { AuthService } from 'src/app/auth/auth.service';
 import { MapModalComponent } from 'src/app/shared/map-modal/map-modal.component';
@@ -45,34 +47,28 @@ export class PlaceDetailPage implements OnInit, OnDestroy {
         this.navCtrl.navigateBack('/places/tabs/discover');
         return;
       }
-
       this.isLoading = true;
-      this.placeSub = this.placesService
-        .getPlace(paramMap.get('placeId'))
-        .subscribe(
-          place => {
-            this.place = place;
-            this.bookable = this.authService.userId !== place.userId;
-            this.isLoading = false;
-          },
-          error => {
-            this.alertCtrl
-              .create({
-                header: 'An error ocurred!!',
-                message: 'Could not fetch place. Please try again later!',
-                backdropDismiss: false,
-                buttons: [
-                  {
-                    text: 'Okay',
-                    handler: () => {
-                      this.router.navigate(['/places/tabs/discover']);
-                    }
-                  }
-                ]
-              })
-              .then(alertEl => alertEl.present());
-          }
-        );
+
+      let userId: string;
+
+      this.placeSub = this.authService.userId
+        .pipe(
+          take(1),
+          switchMap(id => {
+            if (!id) {
+              throw new Error('Found no user');
+            }
+
+            userId = id;
+
+            return this.placesService.getPlace(paramMap.get('placeId'));
+          })
+        )
+        .subscribe(place => {
+          this.place = place;
+          this.bookable = userId !== place.userId;
+          this.isLoading = false;
+        });
     });
   }
 

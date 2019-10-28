@@ -2,7 +2,7 @@ import { Injectable } from '@angular/core';
 import { Booking } from './booking.model';
 import { BehaviorSubject } from 'rxjs';
 import { AuthService } from '../auth/auth.service';
-import { map, take, delay, tap, switchMap } from 'rxjs/operators';
+import { map, take, tap, switchMap } from 'rxjs/operators';
 import { HttpClient } from '@angular/common/http';
 import { environment } from 'src/environments/environment';
 
@@ -29,9 +29,14 @@ export class BookingService {
   }
 
   fectchBookings() {
-    return this.http
+    return this.authService.userId.pipe(switchMap(userId => {
+      if (!userId) {
+        throw new Error('User not found');
+      }
+
+      return this.http
       .get<{ [key: string]: BookingData }>(
-        `${environment.serverBaseUrl}/bookings.json?orderBy="userId"&equalTo="${this.authService.userId}"`
+        `${environment.serverBaseUrl}/bookings.json?orderBy="userId"&equalTo="${userId}"`
       )
       .pipe(
         map(response => {
@@ -60,6 +65,7 @@ export class BookingService {
           this.mBookings.next(bookings);
         })
       );
+    }));
   }
 
   addBooking(
@@ -72,42 +78,52 @@ export class BookingService {
     dateFrom: Date,
     dateTo: Date
   ) {
-    const booking = new Booking(
-      null,
-      placeId,
-      this.authService.userId,
-      placeTitle,
-      placeImageUrl,
-      firstName,
-      lastName,
-      guestNumber,
-      dateFrom,
-      dateTo
-    );
-
-    return this.fectchBookings().pipe(
-      switchMap(bookings => {
-        const index = bookings.findIndex(
-          item =>
-            item.userId === booking.userId && item.placeId === booking.placeId
-        );
-
-        if (index !== -1) {
-          throw new Error('You already booked this place!!');
+    return this.authService.userId.pipe(
+      take(1),
+      switchMap(userId => {
+        if (!userId) {
+          throw new Error('No user id found!');
         }
 
-        return this.http.post<{ name: string }>(
-          `${environment.serverBaseUrl}/bookings.json`,
-          booking
+        const booking = new Booking(
+          null,
+          placeId,
+          userId,
+          placeTitle,
+          placeImageUrl,
+          firstName,
+          lastName,
+          guestNumber,
+          dateFrom,
+          dateTo
         );
-      }),
-      switchMap(res => {
-        booking.id = res.name;
-        return this.bookings;
-      }),
-      take(1),
-      tap(bookings => {
-        this.mBookings.next(bookings.concat(booking));
+
+        return this.fectchBookings().pipe(
+          switchMap(bookings => {
+            const index = bookings.findIndex(
+              item =>
+                item.userId === booking.userId &&
+                item.placeId === booking.placeId
+            );
+
+            if (index !== -1) {
+              throw new Error('You already booked this place!!');
+            }
+
+            return this.http.post<{ name: string }>(
+              `${environment.serverBaseUrl}/bookings.json`,
+              booking
+            );
+          }),
+          switchMap(res => {
+            booking.id = res.name;
+            return this.bookings;
+          }),
+          take(1),
+          tap(bookings => {
+            this.mBookings.next(bookings.concat(booking));
+          })
+        );
       })
     );
   }

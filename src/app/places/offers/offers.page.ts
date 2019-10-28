@@ -5,6 +5,7 @@ import { IonItemSliding } from '@ionic/angular';
 import { Router } from '@angular/router';
 import { AuthService } from 'src/app/auth/auth.service';
 import { Subscription } from 'rxjs';
+import { take, switchMap } from 'rxjs/operators';
 
 @Component({
   selector: 'app-offers',
@@ -23,9 +24,20 @@ export class OffersPage implements OnInit, OnDestroy {
   ) {}
 
   ngOnInit() {
-    this.placesSub = this.placesService.places.subscribe(places => {
+    let userId: string;
+
+    this.authService.userId.pipe(take(1), switchMap(id => {
+      if (!id) {
+        throw new Error('User not found');
+      }
+
+      userId = id;
+
+      return this.placesService.places;
+    }))
+    .subscribe(places => {
       this.loadedPlaces = places.filter(
-        place => place.userId === this.authService.userId
+        place => place.userId === userId
       );
     });
   }
