@@ -2,8 +2,10 @@ import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { environment } from 'src/environments/environment';
 import { User } from './user.model';
-import { BehaviorSubject } from 'rxjs';
+import { BehaviorSubject, from } from 'rxjs';
 import { map, tap } from 'rxjs/operators';
+
+import { Plugins } from '@capacitor/core';
 
 export interface AuthResponse {
   kind: string;
@@ -30,6 +32,44 @@ export class AuthService {
   }
 
   constructor(private http: HttpClient) {}
+
+  autoLogin() {
+    return from(Plugins.Storage.get({ key: 'authData' })).pipe(
+      map(authData => {
+        if (!authData || !authData.value) {
+          return null;
+        }
+
+        const parsedData = JSON.parse(authData.value) as {
+          userId: string;
+          email: string;
+          token: string;
+          tokenExpirationDate: string;
+        };
+
+        const expirationTime = new Date(parsedData.tokenExpirationDate);
+
+        if (expirationTime <= new Date()) {
+          return null;
+        }
+
+        return new User(
+          parsedData.userId,
+          parsedData.email,
+          parsedData.token,
+          expirationTime
+        );
+      }),
+      tap(user => {
+        if (user) {
+          this.mUser.next(user);
+        }
+      }),
+      map(user => {
+        return !!user;
+      })
+    );
+  }
 
   signUp(email: string, password: string) {
     return this.http
@@ -65,5 +105,22 @@ export class AuthService {
         expirationTime
       )
     );
+
+    this.storeAuthData(
+      userData.localId,
+      userData.email,
+      userData.idToken,
+      expirationTime.toISOString()
+    );
+  }
+
+  private storeAuthData(
+    userId: string,
+    email: string,
+    token: string,
+    tokenExpirationDate: string
+  ) {
+    const value = JSON.stringify({ userId, token, email, tokenExpirationDate });
+    Plugins.Storage.set({ key: 'authData', value });
   }
 }
