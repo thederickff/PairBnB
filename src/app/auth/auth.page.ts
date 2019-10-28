@@ -1,8 +1,9 @@
 import { Component, OnInit } from '@angular/core';
-import { AuthService } from './auth.service';
+import { AuthService, AuthResponse } from './auth.service';
 import { Router } from '@angular/router';
 import { LoadingController, AlertController } from '@ionic/angular';
 import { NgForm } from '@angular/forms';
+import { Observable } from 'rxjs';
 
 @Component({
   selector: 'app-auth',
@@ -22,14 +23,20 @@ export class AuthPage implements OnInit {
   ngOnInit() {}
 
   async authenticate(email: string, password: string) {
-    this.authService.login();
     const loading = await this.loadingCtrl.create({
       keyboardClose: true,
       message: 'Loggin in...'
     });
     loading.present();
+    let authObs: Observable<AuthResponse>;
 
-    this.authService.signUp(email, password).subscribe(
+    if (this.isLogin) {
+      authObs = this.authService.login(email, password);
+    } else {
+      authObs = this.authService.signUp(email, password);
+    }
+
+    authObs.subscribe(
       resData => {
         loading.dismiss();
         this.router.navigateByUrl('/places/tabs/discover');
@@ -42,8 +49,13 @@ export class AuthPage implements OnInit {
         let message = 'Please try again!';
         if (code === 'EMAIL_EXISTS') {
           message = 'This email address exists already!';
+        } else if (code === 'EMAIL_NOT_FOUND') {
+          message = 'E-Mail address could not be found.';
+        } else if (code === 'INVALID_PASSWORD') {
+          message = 'This password is not corrent.';
         }
-        this.showAlert('Could not sign you up.', message);
+
+        this.showAlert('Could not authenticate.', message);
       }
     );
   }
