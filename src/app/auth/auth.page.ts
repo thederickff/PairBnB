@@ -1,7 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { AuthService } from './auth.service';
 import { Router } from '@angular/router';
-import { LoadingController } from '@ionic/angular';
+import { LoadingController, AlertController } from '@ionic/angular';
 import { NgForm } from '@angular/forms';
 
 @Component({
@@ -15,12 +15,13 @@ export class AuthPage implements OnInit {
   constructor(
     private authService: AuthService,
     private router: Router,
-    private loadingCtrl: LoadingController
+    private loadingCtrl: LoadingController,
+    private alertCtrl: AlertController
   ) {}
 
   ngOnInit() {}
 
-  async onLogin() {
+  async authenticate(email: string, password: string) {
     this.authService.login();
     const loading = await this.loadingCtrl.create({
       keyboardClose: true,
@@ -28,10 +29,23 @@ export class AuthPage implements OnInit {
     });
     loading.present();
 
-    setTimeout(() => {
-      loading.dismiss();
-      this.router.navigateByUrl('/places/tabs/discover');
-    }, 1500);
+    this.authService.signUp(email, password).subscribe(
+      resData => {
+        loading.dismiss();
+        this.router.navigateByUrl('/places/tabs/discover');
+        console.log(resData);
+      },
+      errorRes => {
+        loading.dismiss();
+        const code = errorRes.error.error.message;
+
+        let message = 'Please try again!';
+        if (code === 'EMAIL_EXISTS') {
+          message = 'This email address exists already!';
+        }
+        this.showAlert('Could not sign you up.', message);
+      }
+    );
   }
 
   onSwitchAuthMode() {
@@ -45,13 +59,12 @@ export class AuthPage implements OnInit {
 
     const { email, password } = form.value;
 
-    console.log(email, password);
+    this.authenticate(email, password);
+  }
 
-    if (this.isLogin) {
-      // Send a resquest to login servers
-      this.onLogin();
-    } else {
-      // Send a resquest to signup servers
-    }
+  private showAlert(header: string, message: string) {
+    this.alertCtrl
+      .create({ header, message, buttons: ['Ok'] })
+      .then(alertEl => alertEl.present());
   }
 }

@@ -1,11 +1,23 @@
 import { Injectable } from '@angular/core';
+import { HttpClient } from '@angular/common/http';
+import { environment } from 'src/environments/environment';
+
+interface AuthResponse {
+  kind: string;
+  idToken: string;
+  email: string;
+  refreshToken: string;
+  localId: string;
+  expiresIn: string;
+  registered?: boolean;
+}
 
 @Injectable({
   providedIn: 'root'
 })
 export class AuthService {
-  private mUserIsAuthenticated = true;
-  private mUserId = 'user01';
+  private mUserIsAuthenticated = false;
+  private mUserId = null;
 
   get userIsAuthenticated() {
     return this.mUserIsAuthenticated;
@@ -15,7 +27,14 @@ export class AuthService {
     return this.mUserId;
   }
 
-  constructor() {}
+  constructor(private http: HttpClient) {}
+
+  signUp(email: string, password: string) {
+    return this.http.post<AuthResponse>(
+      `https://identitytoolkit.googleapis.com/v1/accounts:signUp?key=${environment.firebaseApiKey}`,
+      { email, password, returnSecureToken: true }
+    );
+  }
 
   login() {
     this.mUserIsAuthenticated = true;

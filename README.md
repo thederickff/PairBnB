@@ -15,7 +15,8 @@ export const environment = {
   production: false,
   // I am using firebase's realtime database url, you can use any other
   serverBaseUrl: "<PLACE YOUR BACKEND URL HERE>",
-  googleMapsApiKey: "<PLACE YOUR GOOGLE MAPS API KEY HERE>"
+  googleMapsApiKey: "<PLACE YOUR GOOGLE MAPS API KEY HERE>",
+  firebaseApiKey: "<PLACE YOUR FIREBASE API KEY HERE>"
 };
 
 /*
