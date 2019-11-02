@@ -91,6 +91,7 @@ export class AuthService {
 
   logout() {
     this.mUser.next(null);
+    Plugins.Storage.remove({key: 'authData'});
   }
 
   private setUserData(userData: AuthResponse) {

@@ -40,7 +40,6 @@ export class AuthPage implements OnInit {
       resData => {
         loading.dismiss();
         this.router.navigateByUrl('/places/tabs/discover');
-        console.log(resData);
       },
       errorRes => {
         loading.dismiss();
@@ -72,6 +71,7 @@ export class AuthPage implements OnInit {
     const { email, password } = form.value;
 
     this.authenticate(email, password);
+    form.reset();
   }
 
   private showAlert(header: string, message: string) {

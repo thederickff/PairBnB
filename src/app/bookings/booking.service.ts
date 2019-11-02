@@ -29,43 +29,46 @@ export class BookingService {
   }
 
   fectchBookings() {
-    return this.authService.userId.pipe(switchMap(userId => {
-      if (!userId) {
-        throw new Error('User not found');
-      }
+    return this.authService.userId.pipe(
+      take(1),
+      switchMap(userId => {
+        if (!userId) {
+          throw new Error('User not found');
+        }
 
-      return this.http
-      .get<{ [key: string]: BookingData }>(
-        `${environment.serverBaseUrl}/bookings.json?orderBy="userId"&equalTo="${userId}"`
-      )
-      .pipe(
-        map(response => {
-          const bookings: Booking[] = [];
+        return this.http
+          .get<{ [key: string]: BookingData }>(
+            `${environment.serverBaseUrl}/bookings.json?orderBy="userId"&equalTo="${userId}"`
+          )
+          .pipe(
+            map(response => {
+              const bookings: Booking[] = [];
 
-          for (const key in response) {
-            if (response.hasOwnProperty(key)) {
-              bookings.push({
-                id: key,
-                placeId: response[key].placeId,
-                userId: response[key].userId,
-                placeTitle: response[key].placeTitle,
-                placeImageUrl: response[key].placeImageUrl,
-                firstName: response[key].firstName,
-                lastName: response[key].lastName,
-                guestNumber: response[key].guestNumber,
-                dateFrom: new Date(response[key].dateFrom),
-                dateTo: new Date(response[key].dateTo)
-              });
-            }
-          }
+              for (const key in response) {
+                if (response.hasOwnProperty(key)) {
+                  bookings.push({
+                    id: key,
+                    placeId: response[key].placeId,
+                    userId: response[key].userId,
+                    placeTitle: response[key].placeTitle,
+                    placeImageUrl: response[key].placeImageUrl,
+                    firstName: response[key].firstName,
+                    lastName: response[key].lastName,
+                    guestNumber: response[key].guestNumber,
+                    dateFrom: new Date(response[key].dateFrom),
+                    dateTo: new Date(response[key].dateTo)
+                  });
+                }
+              }
 
-          return bookings;
-        }),
-        tap(bookings => {
-          this.mBookings.next(bookings);
-        })
-      );
-    }));
+              return bookings;
+            }),
+            tap(bookings => {
+              this.mBookings.next(bookings);
+            })
+          );
+      })
+    );
   }
 
   addBooking(
