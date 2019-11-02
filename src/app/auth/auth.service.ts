@@ -32,6 +32,12 @@ export class AuthService implements OnDestroy {
     return this.mUser.asObservable().pipe(map(user => (user ? user.id : null)));
   }
 
+  get token() {
+    return this.mUser
+      .asObservable()
+      .pipe(map(user => (user ? user.token : null)));
+  }
+
   constructor(private http: HttpClient) {}
 
   ngOnDestroy() {

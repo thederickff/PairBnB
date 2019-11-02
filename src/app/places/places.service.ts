@@ -31,66 +31,82 @@ export class PlacesService {
   }
 
   fetchPlaces() {
-    return this.http
-      .get<{ [key: string]: PlaceData }>(
-        `${environment.serverBaseUrl}/places.json`
-      )
-      .pipe(
-        map(response => {
-          const places = [];
-          for (const key in response) {
-            if (response.hasOwnProperty(key)) {
-              places.push(
-                new Place(
-                  key,
-                  response[key].title,
-                  response[key].description,
-                  response[key].imageUrl,
-                  response[key].price,
-                  new Date(response[key].availableFrom),
-                  new Date(response[key].availableTo),
-                  response[key].userId,
-                  response[key].location
-                )
-              );
-            }
+    return this.authService.token.pipe(
+      take(1),
+      switchMap(token => {
+        return this.http.get<{ [key: string]: PlaceData }>(
+          `${environment.serverBaseUrl}/places.json?auth=${token}`
+        );
+      }),
+      map(response => {
+        const places = [];
+        for (const key in response) {
+          if (response.hasOwnProperty(key)) {
+            places.push(
+              new Place(
+                key,
+                response[key].title,
+                response[key].description,
+                response[key].imageUrl,
+                response[key].price,
+                new Date(response[key].availableFrom),
+                new Date(response[key].availableTo),
+                response[key].userId,
+                response[key].location
+              )
+            );
           }
+        }
 
-          return places;
-        }),
-        tap(places => {
-          this.mPlaces.next(places);
-        })
-      );
+        return places;
+      }),
+      tap(places => {
+        this.mPlaces.next(places);
+      })
+    );
   }
 
   getPlace(placeId: string) {
-    return this.http
-      .get<PlaceData>(`${environment.serverBaseUrl}/places/${placeId}.json`)
-      .pipe(
-        map(place => {
-          return new Place(
-            placeId,
-            place.title,
-            place.description,
-            place.imageUrl,
-            place.price,
-            new Date(place.availableFrom),
-            new Date(place.availableTo),
-            place.userId,
-            place.location
-          );
-        })
-      );
+    return this.authService.token.pipe(
+      take(1),
+      switchMap(token => {
+        return this.http.get<PlaceData>(
+          `${environment.serverBaseUrl}/places/${placeId}.json?auth=${token}`
+        );
+      }),
+      map(place => {
+        return new Place(
+          placeId,
+          place.title,
+          place.description,
+          place.imageUrl,
+          place.price,
+          new Date(place.availableFrom),
+          new Date(place.availableTo),
+          place.userId,
+          place.location
+        );
+      })
+    );
   }
 
   uploadImage(image: File) {
     const uploadData = new FormData();
     uploadData.append('image', image);
 
-    return this.http.post<{ imageUrl: string; imagePath: string }>(
-      `${environment.uploadImageCloudFunctionUrl}`,
-      uploadData
+    return this.authService.token.pipe(
+      take(1),
+      switchMap(token => {
+        return this.http.post<{ imageUrl: string; imagePath: string }>(
+          `${environment.uploadImageCloudFunctionUrl}`,
+          uploadData,
+          {
+            headers: {
+              authorization: 'Bearer ' + token
+            }
+          }
+        );
+      })
     );
   }
 
@@ -122,21 +138,26 @@ export class PlacesService {
           location
         );
 
-        return this.http
-          .post<{ name: string }>(`${environment.serverBaseUrl}/places.json`, {
-            ...newPlace,
-            id: null
+        return this.authService.token.pipe(
+          take(1),
+          switchMap(token => {
+            return this.http.post<{ name: string }>(
+              `${environment.serverBaseUrl}/places.json?auth=${token}`,
+              {
+                ...newPlace,
+                id: null
+              }
+            );
+          }),
+          switchMap(response => {
+            newPlace.id = response.name;
+            return this.places;
+          }),
+          take(1),
+          tap(places => {
+            this.mPlaces.next(places.concat(newPlace));
           })
-          .pipe(
-            switchMap(response => {
-              newPlace.id = response.name;
-              return this.places;
-            }),
-            take(1),
-            tap(places => {
-              this.mPlaces.next(places.concat(newPlace));
-            })
-          );
+        );
       })
     );
   }
@@ -160,12 +181,17 @@ export class PlacesService {
 
         updatedPlaces = places;
 
-        return this.http.put(
-          `${environment.serverBaseUrl}/places/${placeId}.json`,
-          {
-            ...places[index],
-            id: null
-          }
+        return this.authService.token.pipe(
+          take(1),
+          switchMap(token => {
+            return this.http.put(
+              `${environment.serverBaseUrl}/places/${placeId}.json?auth=${token}`,
+              {
+                ...places[index],
+                id: null
+              }
+            );
+          })
         );
       }),
       tap(() => {
