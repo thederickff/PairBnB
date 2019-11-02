@@ -1,4 +1,4 @@
-import { Injectable } from '@angular/core';
+import { Injectable, OnDestroy } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { environment } from 'src/environments/environment';
 import { User } from './user.model';
@@ -20,11 +20,12 @@ export interface AuthResponse {
 @Injectable({
   providedIn: 'root'
 })
-export class AuthService {
+export class AuthService implements OnDestroy {
   private mUser = new BehaviorSubject<User>(null);
+  private activeLogoutTimer: any;
 
   get userIsAuthenticated() {
-    return this.mUser.asObservable().pipe(map(user => user && !!user.token));
+    return this.mUser.asObservable().pipe(map(user => !!user && !!user.token));
   }
 
   get userId() {
@@ -32,6 +33,12 @@ export class AuthService {
   }
 
   constructor(private http: HttpClient) {}
+
+  ngOnDestroy() {
+    if (this.activeLogoutTimer) {
+      clearTimeout(this.activeLogoutTimer);
+    }
+  }
 
   autoLogin() {
     return from(Plugins.Storage.get({ key: 'authData' })).pipe(
@@ -63,6 +70,7 @@ export class AuthService {
       tap(user => {
         if (user) {
           this.mUser.next(user);
+          this.autoLogout(user.tokenExpiration);
         }
       }),
       map(user => {
@@ -90,22 +98,37 @@ export class AuthService {
   }
 
   logout() {
+    if (this.activeLogoutTimer) {
+      clearTimeout(this.activeLogoutTimer);
+    }
+
     this.mUser.next(null);
-    Plugins.Storage.remove({key: 'authData'});
+    Plugins.Storage.remove({ key: 'authData' });
+  }
+
+  private autoLogout(duration: number) {
+    if (this.activeLogoutTimer) {
+      clearTimeout(this.activeLogoutTimer);
+    }
+
+    this.activeLogoutTimer = setTimeout(() => {
+      this.logout();
+    }, duration);
   }
 
   private setUserData(userData: AuthResponse) {
     const expirationTime = new Date(
       new Date().getTime() + +userData.expiresIn * 1000
     );
-    this.mUser.next(
-      new User(
-        userData.localId,
-        userData.email,
-        userData.idToken,
-        expirationTime
-      )
+    const user = new User(
+      userData.localId,
+      userData.email,
+      userData.idToken,
+      expirationTime
     );
+
+    this.mUser.next(user);
+    this.autoLogout(user.tokenExpiration);
 
     this.storeAuthData(
       userData.localId,
