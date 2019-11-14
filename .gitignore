@@ -38,3 +38,4 @@ src/environments/environment.ts
 functions/
 .firebaserc
 firebase.json
+*.jks
