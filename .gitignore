@@ -39,3 +39,4 @@ functions/
 .firebaserc
 firebase.json
 *.jks
+.firebase/
